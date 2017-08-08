@@ -31,7 +31,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="EntryNameNewPoint">
+                  <object class="GtkEntry" id="NewPointName">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                   </object>
@@ -76,7 +76,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="EntryXPoint">
+                          <object class="GtkEntry" id="XPoint">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="width_chars">5</property>
@@ -101,7 +101,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="EntryYPoint">
+                          <object class="GtkEntry" id="YPoint">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="width_chars">5</property>
@@ -125,7 +125,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="entry1">
+                          <object class="GtkEntry" id="ZPoint">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="width_chars">5</property>
@@ -180,6 +180,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="yalign">0.47999998927116394</property>
+                    <signal name="clicked" handler="btn_ok_insert_point" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -1130,6 +1131,7 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="yalign">0.4699999988079071</property>
+                        <signal name="clicked" handler="insert_new_window" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>

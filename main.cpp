@@ -2,9 +2,14 @@
 #include <iostream>
 #include <vector>
 
+
+using namespace std;
+
 static cairo_surface_t *surface = NULL;
+GtkBuilder *gtkBuilder;
 GtkWidget *drawing_area;
 GtkWidget *window_widget;
+GtkWidget *windowInsertion;
 
 /*Clear the surface, removing the scribbles*/
 static void clear_surface (){
@@ -49,9 +54,29 @@ static gboolean draw_cb (GtkWidget *widget, cairo_t   *cr,  gpointer   data){
   gtk_widget_queue_draw (window_widget);
  } 
 
+ extern "C" G_MODULE_EXPORT void insert_new_window () {
+  gtk_widget_show(windowInsertion);
+}
+
+extern "C" G_MODULE_EXPORT void btn_ok_insert_point(){
+  GtkEntry *NewPointName =  GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "NewPointName"));
+  GtkEntry *XPoint =  GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "XPoint"));
+  GtkEntry *YPoint =  GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "YPoint"));
+
+  const char *PointName = gtk_entry_get_text (NewPointName);
+  const char *XPointAux = gtk_entry_get_text (XPoint);
+  const char *YPointAux = gtk_entry_get_text (YPoint);
+
+  double XPointDouble = atof(XPointAux);
+  double YPointDouble = atof(YPointAux);
+  cout << XPointDouble;
+  //printf("%f\n", YPointDouble);
+  
+  // Continuar ...
+}
+
 
 int main(int argc, char *argv[]){
-  GtkBuilder  *gtkBuilder;
   gtk_init(&argc, &argv);
 
   gtkBuilder = gtk_builder_new();
@@ -59,6 +84,7 @@ int main(int argc, char *argv[]){
 
   window_widget = GTK_WIDGET( gtk_builder_get_object( GTK_BUILDER(gtkBuilder), "main_window") );
   drawing_area = GTK_WIDGET( gtk_builder_get_object( GTK_BUILDER(gtkBuilder), "drawing_area") );
+  windowInsertion = GTK_WIDGET( gtk_builder_get_object( GTK_BUILDER(gtkBuilder), "WindowInsertion") );
   g_signal_connect (drawing_area, "draw", G_CALLBACK (draw_cb), NULL);
   g_signal_connect (drawing_area,"configure-event", G_CALLBACK (configure_event_cb), NULL);
   gtk_builder_connect_signals(gtkBuilder, NULL);
