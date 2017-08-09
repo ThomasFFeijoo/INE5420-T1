@@ -3,6 +3,9 @@
 #include <vector>
 
 #include "Ponto.hpp"
+#include "DisplayFile.hpp"
+#include "Viewport.hpp"
+#include "Window.hpp"
 
 
 using namespace std;
@@ -12,6 +15,22 @@ GtkBuilder *gtkBuilder;
 GtkWidget *drawing_area;
 GtkWidget *window_widget;
 GtkWidget *windowInsertion;
+
+DisplayFile *displayFile;
+Viewport *viewportP;
+Window *windowP;
+
+GtkTreeStore *store;
+GtkWidget *treeViewList;
+GtkTreeViewColumn *column;
+GtkCellRenderer *renderer;
+enum{
+  NOME_OBJETO,
+  TIPO_OBJETO
+};
+
+GtkTextBuffer *buffer;
+GtkTextView *outputCommandsShell;
 
 /*Clear the surface, removing the scribbles*/
 static void clear_surface (){
@@ -46,6 +65,41 @@ static gboolean draw_cb (GtkWidget *widget, cairo_t   *cr,  gpointer   data){
   return FALSE;
 }
 
+static gboolean drawWindow (GtkWidget *widget, cairo_t *cr, gpointer data){
+  cairo_set_source_surface (cr, surface, 0, 0);
+  cairo_paint (cr);
+  return FALSE;
+}
+
+/* Redraw the screen from the surface */
+void repaintWindow (){
+  cairo_t *cr;
+  clear_surface();
+  cr = cairo_create (surface);
+  viewportP->transformada(cr, *(windowP->getInicioDaWindow()), *(windowP->getFimDaWindow()), displayFile);
+  gtk_widget_queue_draw (drawing_area);
+}
+
+void setupTree(){
+  store = gtk_tree_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
+  treeViewList = gtk_tree_view_new_with_model (GTK_TREE_MODEL (store));
+  g_object_unref (G_OBJECT (store));
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Nome", renderer, "text", NOME_OBJETO, NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeViewList), column);
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Tipo", renderer, "text", TIPO_OBJETO, NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (treeViewList), column);
+}
+
+void printCommandLogs(const char* text) {
+  GtkTextIter it;
+  GtkTextMark *textMarks = gtk_text_buffer_get_insert(buffer);
+  gtk_text_buffer_get_iter_at_mark (buffer, &it, textMarks);
+  gtk_text_buffer_insert(buffer, &it, text, -1);
+  gtk_text_view_scroll_to_mark(outputCommandsShell, textMarks, 0, false, 0, 0);
+}
+
 /*Function that will be called when the ok button is pressed*/
  extern "C" G_MODULE_EXPORT void btn_ok_clicked_cb(){
   cairo_t *cr;
@@ -61,6 +115,7 @@ static gboolean draw_cb (GtkWidget *widget, cairo_t   *cr,  gpointer   data){
 }
 
 extern "C" G_MODULE_EXPORT void btn_ok_insert_point(){
+  printCommandLogs("btn_ok_insert_point\n");
   GtkEntry *NewPointName =  GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "NewPointName"));
   GtkEntry *XPoint =  GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "XPoint"));
   GtkEntry *YPoint =  GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "YPoint"));
@@ -74,6 +129,8 @@ extern "C" G_MODULE_EXPORT void btn_ok_insert_point(){
   
   Ponto * ponto = new Ponto(PointName, "Ponto", std::vector<Coordenadas>({Coordenadas(XPointDouble, YPointDouble, 0, 0)}));
   gtk_widget_hide(windowInsertion);
+  displayFile->addObjectInTheWorld(ponto);
+  repaintWindow ();
 
 }
 
@@ -87,7 +144,24 @@ int main(int argc, char *argv[]){
   window_widget = GTK_WIDGET( gtk_builder_get_object( GTK_BUILDER(gtkBuilder), "main_window") );
   drawing_area = GTK_WIDGET( gtk_builder_get_object( GTK_BUILDER(gtkBuilder), "drawing_area") );
   windowInsertion = GTK_WIDGET( gtk_builder_get_object( GTK_BUILDER(gtkBuilder), "WindowInsertion") );
-  g_signal_connect (drawing_area, "draw", G_CALLBACK (draw_cb), NULL);
+  outputCommandsShell = GTK_TEXT_VIEW(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "OutputCommandsShell"));
+
+  buffer = gtk_text_buffer_new(NULL);
+  gtk_text_view_set_buffer(outputCommandsShell, buffer);
+  gtk_text_view_set_wrap_mode(outputCommandsShell, GTK_WRAP_NONE);
+
+  Coordenadas inicio = Coordenadas(0.0,0.0,0.0,0.0);
+  Coordenadas fim = Coordenadas(300.0,300.0,0.0,0.0);
+  DisplayFile dp = DisplayFile();
+  displayFile = &dp;
+  Viewport vp = Viewport();
+  viewportP = &vp;
+  Window cWindow = Window(&inicio, &fim, displayFile);
+  windowP = &cWindow;
+
+  setupTree();
+
+  g_signal_connect (drawing_area, "draw", G_CALLBACK (drawWindow), NULL);
   g_signal_connect (drawing_area,"configure-event", G_CALLBACK (configure_event_cb), NULL);
   gtk_builder_connect_signals(gtkBuilder, NULL);
   gtk_widget_show_all(window_widget);
