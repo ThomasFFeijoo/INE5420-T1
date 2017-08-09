@@ -2,6 +2,8 @@
 #include <iostream>
 #include <vector>
 
+#include "Ponto.hpp"
+
 
 using namespace std;
 
@@ -69,10 +71,10 @@ extern "C" G_MODULE_EXPORT void btn_ok_insert_point(){
 
   double XPointDouble = atof(XPointAux);
   double YPointDouble = atof(YPointAux);
-  cout << XPointDouble;
-  //printf("%f\n", YPointDouble);
   
-  // Continuar ...
+  Ponto * ponto = new Ponto(PointName, "Ponto", std::vector<Coordenadas>({Coordenadas(XPointDouble, YPointDouble, 0, 0)}));
+  gtk_widget_hide(windowInsertion);
+
 }
 
 
