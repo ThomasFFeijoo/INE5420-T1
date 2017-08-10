@@ -1,4 +1,4 @@
-#include "../include/Viewport.hpp"
+#include "Viewport.hpp"
 
 Viewport::Viewport(){
 	coordenadas_minimas = Coordenadas(0.0,0.0,0.0,0.0);

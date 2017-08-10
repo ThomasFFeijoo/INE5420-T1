@@ -474,6 +474,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <signal name="clicked" handler="btn_ok_insert_line" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -653,6 +654,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="xalign">0.51999998092651367</property>
+                    <signal name="clicked" handler="btn_ok_insert_coords_wireframe" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -691,6 +693,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <signal name="clicked" handler="btn_ok_insert_wireframe" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -1179,6 +1182,7 @@
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
                                         <property name="yalign">0.46000000834465027</property>
+                                        <signal name="clicked" handler="btn_up_clicked" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -1192,6 +1196,7 @@
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
                                         <property name="xalign">0.49000000953674316</property>
+                                        <signal name="clicked" handler="btn_left_clicked" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">0</property>
@@ -1204,6 +1209,7 @@
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
+                                        <signal name="clicked" handler="btn_down_clicked" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -1216,6 +1222,7 @@
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
+                                        <signal name="clicked" handler="btn_right_clicked" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="left_attach">2</property>
@@ -1357,6 +1364,7 @@
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
+                                        <signal name="clicked" handler="btn_zoom_in_clicked" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="expand">True</property>
@@ -1370,6 +1378,7 @@
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
+                                        <signal name="clicked" handler="btn_zoom_out_clicked" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="expand">True</property>
@@ -1440,6 +1449,7 @@
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
                                         <property name="xalign">0.49000000953674316</property>
+                                        <signal name="clicked" handler="get_text_degrees" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="x">50</property>
@@ -1455,6 +1465,7 @@
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
                                         <property name="yalign">0.47999998927116394</property>
+                                        <signal name="clicked" handler="get_text_degrees" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="y">30</property>
@@ -1469,6 +1480,7 @@
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
                                         <property name="xalign">0.46000000834465027</property>
+                                        <signal name="clicked" handler="get_text_degrees" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="x">100</property>
