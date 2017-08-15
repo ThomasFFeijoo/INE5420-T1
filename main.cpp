@@ -22,7 +22,7 @@ DisplayFile *displayFile;
 Viewport *viewportP;
 Window *windowP;
 
-std::vector<Coordenadas> wireframeCoords;
+std::vector<Coordenadas> poligonoCoords;
 
 GtkTreeStore *store;
 GtkWidget *treeViewList;
@@ -33,8 +33,6 @@ enum{
   TIPO_OBJETO
 };
 
-GtkTextBuffer *buffer;
-GtkTextView *outputCommandsShell;
 
 /*Clear the surface, removing the scribbles*/
 static void clear_surface (){
@@ -75,7 +73,8 @@ static gboolean drawWindow (GtkWidget *widget, cairo_t *cr, gpointer data){
   return FALSE;
 }
 
-/* Redraw the screen from the surface */
+
+/* Faz a conversão da window */
 void repaintWindow (){
   cairo_t *cr;
   clear_surface();
@@ -83,6 +82,7 @@ void repaintWindow (){
   viewportP->transformada(cr, *(windowP->getInicioDaWindow()), *(windowP->getFimDaWindow()), displayFile);
   gtk_widget_queue_draw (drawing_area);
 }
+
 
 void setupTree(){
   store = gtk_tree_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
@@ -96,30 +96,20 @@ void setupTree(){
   gtk_tree_view_append_column (GTK_TREE_VIEW (treeViewList), column);
 }
 
-void printCommandLogs(const char* text) {
-  GtkTextIter it;
-  GtkTextMark *textMarks = gtk_text_buffer_get_insert(buffer);
-  gtk_text_buffer_get_iter_at_mark (buffer, &it, textMarks);
-  gtk_text_buffer_insert(buffer, &it, text, -1);
-  gtk_text_view_scroll_to_mark(outputCommandsShell, textMarks, 0, false, 0, 0);
-}
-
-/*Function that will be called when the ok button is pressed*/
- extern "C" G_MODULE_EXPORT void btn_ok_clicked_cb(){
-  cairo_t *cr;
-  cr = cairo_create (surface);
-  cairo_move_to(cr, 200, 100);
-  cairo_line_to(cr, 300, 50);
-  cairo_stroke(cr);
-  gtk_widget_queue_draw (window_widget);
- } 
-
+/* Bota na tela a janela que receberá os parametros dos objetos*/
  extern "C" G_MODULE_EXPORT void insert_new_window () {
   gtk_widget_show(windowInsertion);
 }
 
+/* Fecha a tela que recebe os parametros*/
+extern "C" G_MODULE_EXPORT void btn_cancel_insertion () {
+  gtk_widget_hide(windowInsertion);
+}
+
+/* Adiciona um novo Ponto. Primeiro pega os objetos que contem as informações de nome e coordenadas. Após isso, extrai o texto dos objetos pegos. 
+Converte as coords para double, cria um objeto Ponto passando os parametros pegos, adiciona ele ao displayfile.*/
+
 extern "C" G_MODULE_EXPORT void btn_ok_insert_point(){
-  printCommandLogs("btn_ok_insert_point\n");
   GtkEntry *NewPointName =  GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "NewPointName"));
   GtkEntry *XPoint =  GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "XPoint"));
   GtkEntry *YPoint =  GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "YPoint"));
@@ -137,8 +127,10 @@ extern "C" G_MODULE_EXPORT void btn_ok_insert_point(){
   repaintWindow ();
 }
 
+/* Adiciona uma nova Linha. Primeiro pega os objetos que contem as informações de nome e coordenadas. Após isso, extrai o texto dos objetos pegos. 
+Converte as coords para double, cria um objeto Linha passando os parametros pegos, adiciona ele ao displayfile.*/
+
 extern "C" G_MODULE_EXPORT void btn_ok_insert_line(){
-  printCommandLogs("btn_ok_insert_line_actived\n");
   GtkEntry *entryNameNewLine = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryNameNewLine"));
   GtkEntry *entryX1Line = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryX1Line"));
   GtkEntry *entryY1Line = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryY1Line"));
@@ -167,79 +159,67 @@ extern "C" G_MODULE_EXPORT void btn_ok_insert_line(){
   repaintWindow ();
 }
 
-extern "C" G_MODULE_EXPORT void btn_ok_insert_wireframe(){
-  printCommandLogs("btn_ok_insert_wireframe_actived\n");
+/* Adiciona um novo poligono. Ele pega as coordenadas armazenadas pelo metodo 'btn_ok_insert_coords_poligono', cria um novo objeto Poligono e adiciona ao displayFile. */
 
-  GtkEntry *entryNameNewWireframe = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryNameNewWireframe"));
-  const char *entryWireframeName = gtk_entry_get_text (entryNameNewWireframe);
-  wireframeCoords.push_back(wireframeCoords.front());
-  Poligono * poligono = new Poligono(entryWireframeName, "Poligono", wireframeCoords);
+extern "C" G_MODULE_EXPORT void btn_ok_insert_poligono(){
+
+  GtkEntry *entryNameNewPoligono = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryNameNewPoligono"));
+  const char *entryPoligonoName = gtk_entry_get_text (entryNameNewPoligono);
+  poligonoCoords.push_back(poligonoCoords.front());
+  Poligono * poligono = new Poligono(entryPoligonoName, "Poligono", poligonoCoords);
   gtk_widget_hide(windowInsertion);
   displayFile->addObjectInTheWorld(poligono);
   repaintWindow ();
 }
 
-extern "C" G_MODULE_EXPORT void btn_ok_insert_coords_wireframe(){
-  printCommandLogs("btn_ok_insert_coords_wireframe_actived\n");
+/* Metodo para pegar as coordenadas que formarão um Poligono*/
+extern "C" G_MODULE_EXPORT void btn_ok_insert_coords_poligono(){
   
-  GtkEntry *entryX1Wireframe = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryX1Wireframe"));
-  GtkEntry *entryY1Wireframe = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryY1Wireframe"));
+  GtkEntry *entryX1Poligono = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryX1Poligono"));
+  GtkEntry *entryY1Poligono = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryY1Poligono"));
 
-  const char *entryX1WireframeAux = gtk_entry_get_text (entryX1Wireframe);
-  const char *entryY1WireframeAux = gtk_entry_get_text (entryY1Wireframe);
+  const char *entryX1PoligonoAux = gtk_entry_get_text (entryX1Poligono);
+  const char *entryY1PoligonoAux = gtk_entry_get_text (entryY1Poligono);
 
-  double X1Wireframe = atof(entryX1WireframeAux);
-  double Y1Wireframe = atof(entryY1WireframeAux);
+  double X1Poligono = atof(entryX1PoligonoAux);
+  double Y1Poligono = atof(entryY1PoligonoAux);
 
-  wireframeCoords.push_back(Coordenadas(X1Wireframe, Y1Wireframe, 0.0, 0.0));
+  poligonoCoords.push_back(Coordenadas(X1Poligono, Y1Poligono, 0.0, 0.0));
 }
 
-extern "C" G_MODULE_EXPORT void get_text_step(){
-  printCommandLogs("get_text_step\n");
-  GtkEntry *entryStep = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryStepSize"));
-  const char *entryStepText = (char*) gtk_entry_get_text (entryStep);
-  printf("Step: %d\n", atoi(entryStepText) );
-}
-
-extern "C" G_MODULE_EXPORT void get_text_degrees(){
-  printCommandLogs("get_text_degrees\n");
-  GtkEntry *entryDegrees = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryDegreesSize"));
-  const char *entryDegreesText = gtk_entry_get_text (entryDegrees);
-}
-
+/* Método que realiza zoom in na window */
 extern "C" G_MODULE_EXPORT void btn_zoom_in_clicked(){
-  printCommandLogs("btn_zoom_in_clicked\n");
   windowP->zoom(1.1);
   repaintWindow ();
 }
 
+/* Método que realiza zoom out na window */
 extern "C" G_MODULE_EXPORT void btn_zoom_out_clicked(){
-  printCommandLogs("btn_zoom_out_clicked\n");
   windowP->zoom(0.9);
   repaintWindow ();
 }
 
+/* Método que desloca os objetos para cima */
 extern "C" G_MODULE_EXPORT void btn_up_clicked(){
-  printCommandLogs("btn_up_clicked\n");
-  windowP->mover(0,10,0);
-  repaintWindow ();
-}
-
-extern "C" G_MODULE_EXPORT void btn_down_clicked(){
-  printCommandLogs("btn_down_clicked\n");
   windowP->mover(0,-10,0);
   repaintWindow ();
 }
 
-extern "C" G_MODULE_EXPORT void btn_left_clicked(){
-  printCommandLogs("btn_left_clicked\n");
-  windowP->mover(-10,0,0);
+/* Método que desloca os objetos para baixo */
+extern "C" G_MODULE_EXPORT void btn_down_clicked(){
+  windowP->mover(0,10,0);
   repaintWindow ();
 }
 
-extern "C" G_MODULE_EXPORT void btn_right_clicked(){
-  printCommandLogs("btn_right_clicked\n");
+/* Método que desloca os objetos para a esquerda */
+extern "C" G_MODULE_EXPORT void btn_left_clicked(){
   windowP->mover(10,0,0);
+  repaintWindow ();
+}
+
+/* Método que desloca os objetos para a direita */
+extern "C" G_MODULE_EXPORT void btn_right_clicked(){
+  windowP->mover(-10,0,0);
   repaintWindow ();
 }
 
@@ -252,11 +232,6 @@ int main(int argc, char *argv[]){
   window_widget = GTK_WIDGET( gtk_builder_get_object( GTK_BUILDER(gtkBuilder), "main_window") );
   drawing_area = GTK_WIDGET( gtk_builder_get_object( GTK_BUILDER(gtkBuilder), "drawing_area") );
   windowInsertion = GTK_WIDGET( gtk_builder_get_object( GTK_BUILDER(gtkBuilder), "WindowInsertion") );
-  outputCommandsShell = GTK_TEXT_VIEW(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "OutputCommandsShell"));
-
-  buffer = gtk_text_buffer_new(NULL);
-  gtk_text_view_set_buffer(outputCommandsShell, buffer);
-  gtk_text_view_set_wrap_mode(outputCommandsShell, GTK_WRAP_NONE);
 
   Coordenadas inicio = Coordenadas(0.0,0.0,0.0,0.0);
   Coordenadas fim = Coordenadas(300.0,300.0,0.0,0.0);
