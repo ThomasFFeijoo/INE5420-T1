@@ -1,5 +1,10 @@
 #include "DisplayFile.hpp"
 
+DisplayFile& DisplayFile::instancia(){
+	static DisplayFile instancia;
+	return instancia;
+}
+
 bool DisplayFile::addObjectInTheWorld(Objeto* obj){
 	if (objectsInTheWorld.insert(std::make_pair(obj->getName(), obj)).second){
 		return true;

@@ -12,6 +12,7 @@ public:
 	DisplayFile(){};
 	~DisplayFile(){};
 
+	static DisplayFile& instancia();
 	bool addObjectInTheWorld(Objeto* obj);
 	void removeObjectFromTheWorld(std::string objName);
 	Objeto* getTheObjectFromTheWorld(std::string objName);
