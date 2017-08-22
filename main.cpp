@@ -197,84 +197,95 @@ extern "C" G_MODULE_EXPORT void btn_remove_object_actived(){
 }
 
 /* Adiciona um novo Ponto. Primeiro pega os objetos que contem as informações de nome e coordenadas. Após isso, extrai o texto dos objetos pegos. 
-Converte as coords para double, cria um objeto Ponto passando os parametros pegos, adiciona ele ao displayfile.*/
+Converte as coords para double, cria um objeto Ponto passando os parametros pegos, adiciona ele ao mundo.*/
 
-extern "C" G_MODULE_EXPORT void btn_ok_insert_point(){
-  GtkEntry *NewPointName =  GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "NewPointName"));
-  GtkEntry *XPoint =  GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "XPoint"));
-  GtkEntry *YPoint =  GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "YPoint"));
+extern "C" G_MODULE_EXPORT void btn_ok_insert_point_actived(){
+  printCommandLogs("btn_ok_insert_point_actived\n");
+  GtkEntry *entryNameNewPoint =  GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryNameNewPoint"));
+  GtkEntry *entryXPoint =  GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryXPoint"));
+  GtkEntry *entryYPoint =  GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryYPoint"));
+  // GtkEntry *entryZPoint =  GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryZPoint"));
 
-  const char *PointName = gtk_entry_get_text (NewPointName);
-  const char *XPointAux = gtk_entry_get_text (XPoint);
-  const char *YPointAux = gtk_entry_get_text (YPoint);
+  const char *entryPointName = gtk_entry_get_text (entryNameNewPoint);
+  const char *entryXPointAux = gtk_entry_get_text (entryXPoint);
+  const char *entryYPointAux = gtk_entry_get_text (entryYPoint);
+  // const char *entryZPointAux = gtk_entry_get_text (entryZPoint);
 
-  double XPointDouble = atof(XPointAux);
-  double YPointDouble = atof(YPointAux);
-  
-  Ponto * ponto = new Ponto(PointName, "Ponto", std::vector<Coordenadas>({Coordenadas(XPointDouble, YPointDouble, 0, 0)}));
+  double XPoint = atof(entryXPointAux);
+  double YPoint = atof(entryYPointAux);
+  // double zPoint= atof(entryZPointAux);
+
+  Ponto * ponto = new Ponto(std::string(entryPointName), "Ponto", std::vector<Coordenadas>({Coordenadas(XPoint, YPoint, 0, 0)}));
   gtk_widget_hide(windowInsertion);
-  displayFile->addObjectInTheWorld(ponto);
+  world->adicionaObjetosNoMundo(ponto);
   repaintWindow ();
 }
-
 /* Adiciona uma nova Linha. Primeiro pega os objetos que contem as informações de nome e coordenadas. Após isso, extrai o texto dos objetos pegos. 
-Converte as coords para double, cria um objeto Linha passando os parametros pegos, adiciona ele ao displayfile.*/
+Converte as coords para double, cria um objeto Linha passando os parametros pegos, adiciona ele ao mundo.*/
 
-extern "C" G_MODULE_EXPORT void btn_ok_insert_line(){
+extern "C" G_MODULE_EXPORT void btn_ok_insert_line_actived(){
+  printCommandLogs("btn_ok_insert_line_actived\n");
+
   GtkEntry *entryNameNewLine = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryNameNewLine"));
   GtkEntry *entryX1Line = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryX1Line"));
   GtkEntry *entryY1Line = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryY1Line"));
-
+  // GtkEntry *entryZ1Line = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryZ1Line"));
   GtkEntry *entryX2Line = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryX2Line"));
   GtkEntry *entryY2Line = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryY2Line"));
-
+  // GtkEntry *entryZ2Line = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryZ2Line"));
 
   const char *entryLineName = gtk_entry_get_text (entryNameNewLine);
   const char *entryX1LineAux = gtk_entry_get_text (entryX1Line);
   const char *entryY1LineAux = gtk_entry_get_text (entryY1Line);
-
+  // const char *entryZ1LineAux = gtk_entry_get_text (entryZ1Line);
   const char *entryX2LineAux = gtk_entry_get_text (entryX2Line);
   const char *entryY2LineAux = gtk_entry_get_text (entryY2Line);
-
+  // const char *entryZ2LineAux = gtk_entry_get_text (entryZ2Line);
 
   double X1Line = atof(entryX1LineAux);
   double Y1Line = atof(entryY1LineAux);
-
+  // double Z1Line= atof(entryZ1LineAux);
   double X2Line= atof(entryX2LineAux);
   double Y2Line= atof(entryY2LineAux);
+  // double Z2Line= atof(entryZ2LineAux);
 
-  Linha * linha = new Linha(entryLineName, "Linha", std::vector<Coordenadas>({Coordenadas(X1Line, Y1Line, 0, 0),Coordenadas(X2Line, Y2Line, 0, 0)}));
+  Linha * linha = new Linha(std::string(entryLineName), "Linha", std::vector<Coordenadas>({Coordenadas(X1Line, Y1Line, 0, 0),Coordenadas(X2Line, Y2Line, 0, 0)}));
   gtk_widget_hide(windowInsertion);
-  displayFile->addObjectInTheWorld(linha);
+  world->adicionaObjetosNoMundo(linha);
   repaintWindow ();
 }
 
 /* Adiciona um novo poligono. Ele pega as coordenadas armazenadas pelo metodo 'btn_ok_insert_coords_poligono', cria um novo objeto Poligono e adiciona ao displayFile. */
 
-extern "C" G_MODULE_EXPORT void btn_ok_insert_poligono(){
+extern "C" G_MODULE_EXPORT void btn_ok_insert_wireframe_actived(){
+  printCommandLogs("btn_ok_insert_wireframe_actived\n");
 
-  GtkEntry *entryNameNewPoligono = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryNameNewPoligono"));
-  const char *entryPoligonoName = gtk_entry_get_text (entryNameNewPoligono);
-  poligonoCoords.push_back(poligonoCoords.front());
-  Poligono * poligono = new Poligono(entryPoligonoName, "Poligono", poligonoCoords);
+  GtkEntry *entryNameNewWireframe = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryNameNewWireframe"));
+  const char *entryWireframeName = gtk_entry_get_text (entryNameNewWireframe);
+  wireframeCoords.push_back(wireframeCoords.front());
+  Poligono * poligono = new Poligono(std::string(entryWireframeName), "Poligono", wireframeCoords);
   gtk_widget_hide(windowInsertion);
-  displayFile->addObjectInTheWorld(poligono);
+  world->adicionaObjetosNoMundo(poligono);
   repaintWindow ();
 }
 
 /* Metodo para pegar as coordenadas que formarão um Poligono*/
-extern "C" G_MODULE_EXPORT void btn_ok_insert_coords_poligono(){
+extern "C" G_MODULE_EXPORT void btn_ok_insert_coords_wireframe_actived(){
+  printCommandLogs("btn_ok_insert_coords_wireframe_actived\n");
   
-  GtkEntry *entryX1Poligono = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryX1Poligono"));
-  GtkEntry *entryY1Poligono = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryY1Poligono"));
+  GtkEntry *entryX1Wireframe = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryX1Wireframe"));
+  GtkEntry *entryY1Wireframe = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryY1Wireframe"));
+  // GtkEntry *entryZ1Wireframe = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryZ1Wireframe"));
 
-  const char *entryX1PoligonoAux = gtk_entry_get_text (entryX1Poligono);
-  const char *entryY1PoligonoAux = gtk_entry_get_text (entryY1Poligono);
+  const char *entryX1WireframeAux = gtk_entry_get_text (entryX1Wireframe);
+  const char *entryY1WireframeAux = gtk_entry_get_text (entryY1Wireframe);
+  // const char *entryZ1WireframeAux = gtk_entry_get_text (entryZ1Wireframe);
 
-  double X1Poligono = atof(entryX1PoligonoAux);
-  double Y1Poligono = atof(entryY1PoligonoAux);
+  double X1Wireframe = atof(entryX1WireframeAux);
+  double Y1Wireframe = atof(entryY1WireframeAux);
+  // double Z1Wireframe= atof(entryZ1WireframeAux);
 
-  poligonoCoords.push_back(Coordenadas(X1Poligono, Y1Poligono, 0.0, 0.0));
+  wireframeCoords.push_back(Coordenadas(X1Wireframe, Y1Wireframe, 0.0, 0.0));
 }
 
 /* Método que realiza zoom in na window */
