@@ -114,15 +114,60 @@ void repaintWindow (){
   gtk_widget_queue_draw (drawing_area);
 }
 
+void printCommandLogs(const char* text) {
+  GtkTextIter it;
+  GtkTextMark *textMarks = gtk_text_buffer_get_insert(buffer);
+  gtk_text_buffer_get_iter_at_mark (buffer, &it, textMarks);
+  gtk_text_buffer_insert(buffer, &it, text, -1);
+  gtk_text_view_scroll_to_mark(outputCommandsShell, textMarks, 0, false, 0, 0);
+}
+
 
 /* Bota na tela a janela que receberá os parametros dos objetos*/
- extern "C" G_MODULE_EXPORT void insert_new_window () {
+extern "C" G_MODULE_EXPORT void insert_new_object_window () {
+  printCommandLogs("insert_new_object_window\n");
   gtk_widget_show(windowInsertion);
 }
 
 /* Fecha a tela que recebe os parametros*/
-extern "C" G_MODULE_EXPORT void btn_cancel_insertion () {
+extern "C" G_MODULE_EXPORT void btn_cancel_insertion_actived () {
+  printCommandLogs("btn_cancel_insertion_actived\n");
   gtk_widget_hide(windowInsertion);
+}
+
+extern "C" G_MODULE_EXPORT void remove_object_window () {
+  printCommandLogs("remove_object_window\n");
+  gtk_widget_show(windowRemove);
+}
+
+extern "C" G_MODULE_EXPORT void btn_cancel_translada_actived () {
+  printCommandLogs("btn_cancel_translada_actived\n");
+  gtk_widget_hide(windowTranslacao);
+}
+
+extern "C" G_MODULE_EXPORT void translada_object_window () {
+  printCommandLogs("translada_object_window\n");
+  gtk_widget_show(windowTranslacao);
+}
+
+extern "C" G_MODULE_EXPORT void btn_cancel_escala_actived () {
+  printCommandLogs("btn_cancel_escala_actived\n");
+  gtk_widget_hide(windowEscalona);
+}
+
+extern "C" G_MODULE_EXPORT void escala_object_window () {
+  printCommandLogs("escala_object_window\n");
+  gtk_widget_show(windowEscalona);
+}
+
+extern "C" G_MODULE_EXPORT void btn_cancel_rotaciona_actived () {
+  printCommandLogs("btn_cancel_rotaciona_actived\n");
+  gtk_widget_hide(windowRotaciona);
+}
+
+extern "C" G_MODULE_EXPORT void rotaciona_object_window () {
+  printCommandLogs("rotaciona_object_window\n");
+  gtk_widget_show(windowRotaciona);
 }
 
 /* Adiciona um novo Ponto. Primeiro pega os objetos que contem as informações de nome e coordenadas. Após isso, extrai o texto dos objetos pegos. 
