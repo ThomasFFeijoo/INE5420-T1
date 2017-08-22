@@ -5,6 +5,7 @@
 #include <vector>
 #include <gtk/gtk.h>
 #include "Coordenadas.hpp"
+#include "Matriz.hpp"
 
 class Objeto{
 private:

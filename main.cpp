@@ -10,6 +10,7 @@
 #include "Window.hpp"
 #include "World.hpp"
 #include "Objeto.hpp"
+#include "Transformacao2D.hpp"
 
 
 using namespace std;
@@ -31,9 +32,10 @@ DisplayFile *displayFile;
 Viewport *viewportP;
 Window *windowP;
 World *world;
+Transformacao2D *transformador;
 
 
-std::vector<Coordenadas> poligonoCoords;
+std::vector<Coordenadas> wireframeCoords;
 
 GtkTextBuffer *buffer;
 GtkTextView *outputCommandsShell;
@@ -288,6 +290,85 @@ extern "C" G_MODULE_EXPORT void btn_ok_insert_coords_wireframe_actived(){
   wireframeCoords.push_back(Coordenadas(X1Wireframe, Y1Wireframe, 0.0, 0.0));
 }
 
+extern "C" G_MODULE_EXPORT void btn_ok_translacao_objeto(){
+  printCommandLogs("btn_ok_translacao_objeto\n");
+  
+  GtkEntry *entryNameObjeto = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryNameObjeto"));
+  GtkEntry *entryXTranslacao = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryXTranslacao"));
+  GtkEntry *entryYTranslacao = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryYTranslacao"));
+  // GtkEntry *entryZTranslacao = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryZTranslacao"));
+
+  const char *entryObjetoName = gtk_entry_get_text (entryNameObjeto);
+  const char *entryXTranslacaoAux = gtk_entry_get_text (entryXTranslacao);
+  const char *entryYTranslacaoAux = gtk_entry_get_text (entryYTranslacao);
+  // const char *entryZTranslacaoAux = gtk_entry_get_text (entryZTranslacao);
+
+  double XTranslacao = atof(entryXTranslacaoAux);
+  double YTranslacao = atof(entryYTranslacaoAux);
+  // double ZTranslacao = atof(entryZTranslacaoAux);
+
+  gtk_widget_hide(windowTranslacao);
+  world->transformarObjeto(std::string(entryObjetoName),transformador->translacao(XTranslacao, YTranslacao));
+  repaintWindow();
+}
+
+extern "C" G_MODULE_EXPORT void btn_ok_escalona_objeto(){
+  printCommandLogs("btn_ok_escalona_objeto\n");
+  
+  GtkEntry *entryNameObjeto = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryNameObjetoEsc"));
+  GtkEntry *entryXEscalona = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryXEscalona"));
+  GtkEntry *entryYEscalona = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryYEscalona"));
+  // GtkEntry *entryZEscalona = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryZEscalona"));
+
+  const char *entryObjetoName = gtk_entry_get_text (entryNameObjeto);
+  const char *entryXEscalonaAux = gtk_entry_get_text (entryXEscalona);
+  const char *entryYEscalonaAux = gtk_entry_get_text (entryYEscalona);
+  // const char *entryZEscalonaAux = gtk_entry_get_text (entryZEscalona);
+
+  double XEscalona = atof(entryXEscalonaAux);
+  double YEscalona = atof(entryYEscalonaAux);
+  // double ZEscalona = atof(entryZEscalonaAux);
+
+  gtk_widget_hide(windowEscalona);
+  world->scalonarObjeto(std::string(entryObjetoName),transformador->escalonamento(XEscalona, YEscalona));
+  repaintWindow();
+}
+
+extern "C" G_MODULE_EXPORT void btn_ok_rotaciona_objeto(){
+  printCommandLogs("btn_ok_rotaciona_objeto\n");
+  
+  GtkEntry *entryNameObjeto = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryNameObjetoRot"));
+  GtkEntry *entryAngleRotaciona = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "AngleToRotate"));
+  const char *entryObjetoName = gtk_entry_get_text (entryNameObjeto);
+  const char *entryAngleRotate = gtk_entry_get_text (entryAngleRotaciona);
+  double angulo = atof(entryAngleRotate);
+
+  GtkToggleButton *BotaoCentroDoMundo = GTK_TOGGLE_BUTTON(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "botaoCentroDoMundo"));
+  GtkToggleButton *BotaCentroDoObjeto = GTK_TOGGLE_BUTTON(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "botaCentroDoObjeto"));
+  gtk_widget_hide(windowRotaciona);
+
+  if (gtk_toggle_button_get_active(BotaoCentroDoMundo)){
+    Coordenadas centroDoMundo = Coordenadas(0.0,0.0,0.0,0.0);
+    world->rotacionarObjeto(std::string(entryObjetoName), false, centroDoMundo, transformador->rotacao(angulo));
+  }
+  if (gtk_toggle_button_get_active(BotaCentroDoObjeto)){
+    Objeto* ob = world->getDisplayfile()->getTheObjectFromTheWorld(std::string(entryObjetoName));
+    world->rotacionarObjeto(std::string(entryObjetoName),false, ob->centroDoObjeto(), transformador->rotacao(angulo));
+  } else {
+    GtkEntry *entryXRotaciona = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryXRotaciona"));
+    GtkEntry *entryYRotaciona = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryYRotaciona"));
+    // GtkEntry *entryZRotaciona = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryZRotaciona"));
+    const char *entryXRotacionaAux = gtk_entry_get_text (entryXRotaciona);
+    const char *entryYRotacionaAux = gtk_entry_get_text (entryYRotaciona);
+    // const char *entryZRotacionaAux = gtk_entry_get_text (entryZRotaciona);
+    double XRotaciona = atof(entryXRotacionaAux);
+    double YRotaciona = atof(entryYRotacionaAux);
+    // double ZRotaciona = atof(entryZRotacionaAux);
+    world->rotacionarObjeto(std::string(entryObjetoName),true, Coordenadas{XRotaciona, YRotaciona, 0.0,0.0}, transformador->rotacao(angulo));
+  }
+  repaintWindow();
+}
+
 /* Método que realiza zoom in na window */
 extern "C" G_MODULE_EXPORT void btn_zoom_in_clicked(){
   windowP->zoom(1.1);
@@ -302,25 +383,32 @@ extern "C" G_MODULE_EXPORT void btn_zoom_out_clicked(){
 
 /* Método que desloca os objetos para cima */
 extern "C" G_MODULE_EXPORT void btn_up_clicked(){
-  windowP->mover(0,-10,0);
+  windowP->mover(0,10,0);
   repaintWindow ();
 }
 
 /* Método que desloca os objetos para baixo */
 extern "C" G_MODULE_EXPORT void btn_down_clicked(){
-  windowP->mover(0,10,0);
+  windowP->mover(0,-10,0);
   repaintWindow ();
 }
 
 /* Método que desloca os objetos para a esquerda */
 extern "C" G_MODULE_EXPORT void btn_left_clicked(){
-  windowP->mover(10,0,0);
+  windowP->mover(-10,0,0);
   repaintWindow ();
 }
 
 /* Método que desloca os objetos para a direita */
 extern "C" G_MODULE_EXPORT void btn_right_clicked(){
-  windowP->mover(-10,0,0);
+  windowP->mover(10,0,0);
+  repaintWindow ();
+}
+
+extern "C" G_MODULE_EXPORT void btn_reset_zoom_actived(){
+  printCommandLogs("btn_reset_zoom_actived\n");
+  inicio = Coordenadas(0.0,0.0,0.0,0.0);
+  fim = Coordenadas(400.0,400.0,0.0,0.0);
   repaintWindow ();
 }
 
