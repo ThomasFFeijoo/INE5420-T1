@@ -12,12 +12,12 @@ public:
 
 	void zoom(double porcentagem);
 	void mover(double x, double y, double z);
+	void setCoordenadas(Coordenadas* inicio, Coordenadas* fim){inicioDaWindow = inicio; fimDaWindow = fim;}
 	Coordenadas* getInicioDaWindow(){return inicioDaWindow;}
 	Coordenadas* getFimDaWindow(){return fimDaWindow;}
 
 	//mexer nas Coordenadas zoom
 private:
-	DisplayFile * displayFile;
 	Coordenadas * inicioDaWindow;
 	Coordenadas * fimDaWindow;
 };
