@@ -229,23 +229,37 @@ int main(int argc, char *argv[]){
   gtkBuilder = gtk_builder_new();
   gtk_builder_add_from_file(gtkBuilder, "window.glade", NULL);
 
-  window_widget = GTK_WIDGET( gtk_builder_get_object( GTK_BUILDER(gtkBuilder), "main_window") );
+  window_widget = GTK_WIDGET( gtk_builder_get_object( GTK_BUILDER(gtkBuilder), "MainWindow") );
   drawing_area = GTK_WIDGET( gtk_builder_get_object( GTK_BUILDER(gtkBuilder), "drawing_area") );
   windowInsertion = GTK_WIDGET( gtk_builder_get_object( GTK_BUILDER(gtkBuilder), "WindowInsertion") );
+  windowRemove = GTK_WIDGET( gtk_builder_get_object( GTK_BUILDER(gtkBuilder), "removeObject") );
+  outputCommandsShell = GTK_TEXT_VIEW(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "OutputCommandsShell"));
+  windowTranslacao = GTK_WIDGET( gtk_builder_get_object( GTK_BUILDER(gtkBuilder), "WindowTranslacao"));
+  windowEscalona = GTK_WIDGET( gtk_builder_get_object( GTK_BUILDER(gtkBuilder), "WindowEscalonamento"));
+  windowRotaciona = GTK_WIDGET( gtk_builder_get_object( GTK_BUILDER(gtkBuilder), "WindowRotaciona"));
+  windowListaObjetos = GTK_WIDGET( gtk_builder_get_object( GTK_BUILDER(gtkBuilder), "ObjectsInTheWorldInterface"));
 
-  Coordenadas inicio = Coordenadas(0.0,0.0,0.0,0.0);
-  Coordenadas fim = Coordenadas(300.0,300.0,0.0,0.0);
+  gtk_text_view_set_editable(GTK_TEXT_VIEW(windowListaObjetos), FALSE);
+  buffer = gtk_text_buffer_new(NULL);
+  gtk_text_view_set_buffer(outputCommandsShell, buffer);
+  gtk_text_view_set_wrap_mode(outputCommandsShell, GTK_WRAP_NONE);
+
   DisplayFile dp = DisplayFile();
   displayFile = &dp;
-  Viewport vp = Viewport();
+  Viewport vp = Viewport(inicio, fim);
   viewportP = &vp;
   Window cWindow = Window(&inicio, &fim, displayFile);
   windowP = &cWindow;
+  World wd = World();
+  world = &wd;
+  Transformacao2D t = Transformacao2D();
+  transformador = &t;
 
-  setupTree();
 
+  g_signal_connect(drawing_area, "draw", G_CALLBACK(on_draw_event), NULL);
   g_signal_connect (drawing_area, "draw", G_CALLBACK (drawWindow), NULL);
   g_signal_connect (drawing_area,"configure-event", G_CALLBACK (configure_event_cb), NULL);
+  
   gtk_builder_connect_signals(gtkBuilder, NULL);
   gtk_widget_show_all(window_widget);
   gtk_main ();
