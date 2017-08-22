@@ -8,30 +8,38 @@
 #include "DisplayFile.hpp"
 #include "Viewport.hpp"
 #include "Window.hpp"
+#include "World.hpp"
+#include "Objeto.hpp"
 
 
 using namespace std;
 
 static cairo_surface_t *surface = NULL;
+
 GtkBuilder *gtkBuilder;
 GtkWidget *drawing_area;
 GtkWidget *window_widget;
 GtkWidget *windowInsertion;
+GtkWidget *windowRemove;
+GtkWidget *windowTranslacao;
+GtkWidget *windowEscalona;
+GtkWidget *windowListaObjetos;
+GtkWidget *windowRotaciona;
+
 
 DisplayFile *displayFile;
 Viewport *viewportP;
 Window *windowP;
+World *world;
+
 
 std::vector<Coordenadas> poligonoCoords;
 
-GtkTreeStore *store;
-GtkWidget *treeViewList;
-GtkTreeViewColumn *column;
-GtkCellRenderer *renderer;
-enum{
-  NOME_OBJETO,
-  TIPO_OBJETO
-};
+GtkTextBuffer *buffer;
+GtkTextView *outputCommandsShell;
+
+Coordenadas inicio = Coordenadas(0.0,0.0,0.0,0.0);
+Coordenadas fim = Coordenadas(400.0,400.0,0.0,0.0);
 
 
 /*Clear the surface, removing the scribbles*/
@@ -67,6 +75,29 @@ static gboolean draw_cb (GtkWidget *widget, cairo_t   *cr,  gpointer   data){
   return FALSE;
 }
 
+/**
+ * Toda vez que a função draw é chamada, ativa essa função.
+ */
+static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
+  cairo_set_source_surface(cr, surface, 0, 0);
+  cairo_paint(cr);
+
+  DisplayFile * aux = world->getDisplayfile();
+  std::unordered_map<std::string, Objeto*> objetos = aux->getAllObjectsFromTheWorld();
+
+  std::string print = "";
+
+  for (auto it = objetos.begin(); it != objetos.end(); ++it){
+    print.append(it->second->getName());
+    print.append("\n");
+  }
+
+  GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(windowListaObjetos));
+  gtk_text_buffer_set_text(buffer, print.c_str(), -1);
+  return FALSE;
+}
+
+
 static gboolean drawWindow (GtkWidget *widget, cairo_t *cr, gpointer data){
   cairo_set_source_surface (cr, surface, 0, 0);
   cairo_paint (cr);
@@ -79,22 +110,10 @@ void repaintWindow (){
   cairo_t *cr;
   clear_surface();
   cr = cairo_create (surface);
-  viewportP->transformada(cr, *(windowP->getInicioDaWindow()), *(windowP->getFimDaWindow()), displayFile);
+  viewportP->transformada(cr, *(windowP->getInicioDaWindow()), *(windowP->getFimDaWindow()), world->getDisplayfile());
   gtk_widget_queue_draw (drawing_area);
 }
 
-
-void setupTree(){
-  store = gtk_tree_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
-  treeViewList = gtk_tree_view_new_with_model (GTK_TREE_MODEL (store));
-  g_object_unref (G_OBJECT (store));
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Nome", renderer, "text", NOME_OBJETO, NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (treeViewList), column);
-  renderer = gtk_cell_renderer_text_new ();
-  column = gtk_tree_view_column_new_with_attributes ("Tipo", renderer, "text", TIPO_OBJETO, NULL);
-  gtk_tree_view_append_column (GTK_TREE_VIEW (treeViewList), column);
-}
 
 /* Bota na tela a janela que receberá os parametros dos objetos*/
  extern "C" G_MODULE_EXPORT void insert_new_window () {
@@ -259,7 +278,7 @@ int main(int argc, char *argv[]){
   g_signal_connect(drawing_area, "draw", G_CALLBACK(on_draw_event), NULL);
   g_signal_connect (drawing_area, "draw", G_CALLBACK (drawWindow), NULL);
   g_signal_connect (drawing_area,"configure-event", G_CALLBACK (configure_event_cb), NULL);
-  
+
   gtk_builder_connect_signals(gtkBuilder, NULL);
   gtk_widget_show_all(window_widget);
   gtk_main ();
