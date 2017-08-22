@@ -170,6 +170,32 @@ extern "C" G_MODULE_EXPORT void rotaciona_object_window () {
   gtk_widget_show(windowRotaciona);
 }
 
+extern "C" G_MODULE_EXPORT void get_text_step(){
+  printCommandLogs("get_text_step\n");
+  GtkEntry *entryStep = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryStepSize"));
+  const char *entryStepText = (char*) gtk_entry_get_text (entryStep);
+  printf("Step: %d\n", atoi(entryStepText) );
+}
+
+extern "C" G_MODULE_EXPORT void get_text_degrees(){
+  printCommandLogs("get_text_degrees\n");
+  GtkEntry *entryDegrees = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "EntryDegreesSize"));
+  const char *entryDegreesText = gtk_entry_get_text (entryDegrees);
+  printf("Degrees: %f\n", atof(entryDegreesText));
+}
+
+extern "C" G_MODULE_EXPORT void btn_remove_object_actived(){
+  printCommandLogs("btn_remove_object_actived\n");
+  GtkEntry *entryStep = GTK_ENTRY(gtk_builder_get_object(GTK_BUILDER(gtkBuilder), "RemoveObjectName"));
+  const char *entryStepText = (char*) gtk_entry_get_text (entryStep);
+  gtk_widget_hide(windowRemove);
+  if (!world->getDisplayfile()->isEmpty())
+  {
+    world->removeObjetosNoMundo(entryStepText);
+    repaintWindow ();
+  }
+}
+
 /* Adiciona um novo Ponto. Primeiro pega os objetos que contem as informações de nome e coordenadas. Após isso, extrai o texto dos objetos pegos. 
 Converte as coords para double, cria um objeto Ponto passando os parametros pegos, adiciona ele ao displayfile.*/
 
